@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Asset Category
+     -->
+
+    <record id="view_account_asset_asset_form_new" model="ir.ui.view">
+        <field name="name">account.asset.asset.form.new</field>
+        <field name="model">account.asset.asset</field>
+        <field name="inherit_id" ref="account_asset.view_account_asset_asset_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='value_residual']" position="after">
+                <field name="cuenta_credito_id" attrs="{'readonly': [('state', '!=', 'draft')]}"/>
+                <field name="diario_id" attrs="{'readonly': [('state', '!=', 'draft')],'invisible': [('diario_id', '=', False)]}"/>
+                <field name="factura_id"
+                       attrs="{'readonly': [('state', '!=', 'draft')]}"
+                       domain="[
+                       ('type', '=', 'in_invoice'),
+                       ('state', '!=', 'draft'),
+                       ('bool_activo_no_corriente', '=', True),
+                       ('bool_doc_revertido', '=', False),
+                       ]"
+                       invisible="1"
+                       options="{'no_create': True}"/>
+                <field name="factura_memoria" invisible="1"/>
+            </xpath>
+
+            <xpath expr="//form[1]/sheet[1]/group[1]" position="after">
+                <h2>FUSIONAR FACTURAS CON ACTIVOS PENDIENTES</h2>
+                <field name="factura_ids"
+                       domain="[
+                       ('type', '=', 'in_invoice'),
+                       ('state', '!=', 'draft'),
+                       ('bool_activo_no_corriente', '=', True),
+                       ('bool_doc_revertido', '=', False),
+                       ]"
+                       attrs="{'readonly': [('state', '!=', 'draft')]}"
+                       options="{'no_create': True}">
+                    <tree decoration-info="state == 'draft'" decoration-muted="state == 'cancel'" decoration-bf="not partner_id" string="Vendor Bill" js_class="account_bills_tree">
+                        <field name="tipo_formulario"/>
+                        <field name="reference"/>
+                        <field name="partner_id" invisible="1"/>
+                        <field name="source_email" invisible="1"/>
+                        <field name="invoice_icon" string=" "/>
+                        <field name="vendor_display_name" groups="base.group_user" string="Vendor"/>
+                        <field name="date_invoice" string="Bill Date"/>
+                        <field name="number"/>
+
+                        <field name="commercial_partner_id" invisible="1"/>
+                        <field name="name" invisible="1"/>
+                        <field name="journal_id" invisible="1"/>
+                        <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                        <field name="date_due" attrs="{&quot;readonly&quot;: [[&quot;state&quot;,&quot;not in&quot;,[&quot;draft&quot;]]]}" invisible="1"/>
+                        <field name="origin" attrs="{&quot;readonly&quot;: [[&quot;state&quot;,&quot;not in&quot;,[&quot;draft&quot;]]]}" invisible="1"/>
+                        <field name="amount_untaxed_invoice_signed" string="Tax Excluded" sum="Total"/>
+                        <field name="amount_tax_signed" string="Tax" sum="Total" attrs="{}" invisible="1"/>
+                        <field name="amount_total_signed" string="Total" sum="Total" attrs="{}" invisible="1"/>
+                        <field name="residual_signed" string="To Pay" sum="To pay" attrs="{}" invisible="1"/>
+                        <field name="currency_id" invisible="1"/>
+                        <field name="company_currency_id" invisible="1"/>
+                        <field name="iva_12" string="IVA 12%" sum="IVA 12%" class="oe_right"/>
+                        <field name="valor_total" string="Valor Total" type="float" sum="Valor Total"/>
+                        <field name="state" attrs="{}" invisible="1"/>
+                        <field name="bool_validar" string="SRI" readonly="1" attrs="{}" invisible="1"/>
+                        <field name="estado" invisible="1"/>
+                        <field name="bool_doc_enviado" invisible="1"/>
+                        <field name="doc_electronico_fecha_autorizacion" invisible="1"/>
+                        <field name="numero_autorizacion" invisible="1"/>
+                        <field name="tipo_documento_tributario" invisible="1"/>
+                        <field name="tipo_documento_tributario" invisible="1"/>
+                        <field name="type" invisible="context.get('type',True)"/>
+                    </tree>
+                </field>
+            </xpath>
+
+            <!-- ATRIBUTOS INVISIBLE: invoice_id -->
+            <xpath expr="//field[@name='invoice_id']" position="attributes">
+                <attribute name="attrs">{}</attribute>
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- ATRIBUTOS INVISIBLE: partner_id -->
+            <xpath expr="//field[@name='partner_id']" position="attributes">
+                <attribute name="attrs">{}</attribute>
+                <attribute name="invisible">1</attribute>
+                <attribute name="readonly">0</attribute>
+            </xpath>
+
+            <!--
+            SE MODIFICAN LOS BOTONES PARA AÑADIR LA CREACION DEL DIARIO CONTABLE EN EL FLUJO
+            DE PROCESO DE ESTE FORMULARIO
+            -->
+            <!-- INVISIBLE: BOTON compute_depreciation_board DENTRO DEL ENCABEZADO DEL FORMULARIO -->
+            <xpath expr="//header/button[@name='validate']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- BOTTON DE CREACION DE JOURNAL -->
+            <xpath expr="//header" position="inside">
+                <button name="compute_validate"
+                        states="draft"
+                        string="Confirmar"
+                        type="object"
+                        class="oe_highlight"
+                />
+            </xpath>
+
+            <!-- INVISIBLE: BOTON compute_depreciation_board DENTRO DEL ENCABEZADO DEL FORMULARIO -->
+            <xpath expr="//header/button[@name='compute_depreciation_board']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <!-- BOTTON DE CREACION DE JOURNAL -->
+            <xpath expr="//header" position="inside">
+                <button name="compute_journal_asset"
+                        states="draft"
+                        string="Tabla Amortización"
+                        type="object"
+                />
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_move_form_new" model="ir.ui.view">
+            <field name="name">account.move.form.new</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_move_form"/>
+            <field name="arch" type="xml">
+
+                <!-- STYLE: narration DENTRO DEL MOVE FORM -->
+                <xpath expr="//field[@name='narration']" position="attributes">
+                    <attribute name="style">font-size: 9pt;  font-family:Monaco;</attribute>
+                </xpath>
+
+            </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- PRODUCT - Contabilidad -->
+    <!-- Product CODIGO DE BARRAS barcode inherte TREE -->
+    <record id="product_product_view_tree_new" model="ir.ui.view">
+            <field name="name">product.product.tree.new</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="account.product_product_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="barcode"/>
+                </xpath>
+            </field>
+        </record>
+
+    <!-- PRODUCT - Contabilidad -->
+    <!-- Product CODIGO DE BARRAS bool_barcode inherte FORM -->
+    <record id="product_template_form_view_new" model="ir.ui.view">
+        <field name="name">product.template.common.form.new</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_normal_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='barcode']" position="before">
+                <field name="bool_barcode"/>
+            </xpath>
+            <!-- READONLY:  barcode -->
+            <xpath expr="//field[@name='barcode']" position="attributes">
+                <attribute name="readonly">0</attribute>
+                <attribute name="attrs">{"readonly": [("bool_barcode","=",False)]}</attribute>
+            </xpath>
+
+            <!-- BOTTON DE ACTUALIZACION DE TODAS LAS IMAGENES -->
+            <xpath expr="//field[@name='name']" position="before">
+                <button name="actualizar_imagenes"
+                      type="object"
+                      icon="fa-gears"
+                      string=" ACTUALIZAR IMAGENES"
+                      class="oe_highlight oe_edit_only"
+                      groups="base.group_user"
+                      attrs="{'invisible': [('name','!=','RETENCIONES IR 1%'),]}"
+                />
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
