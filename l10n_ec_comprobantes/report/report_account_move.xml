@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_move" name="Reporte Asiento Contable">
+            <t t-call="web.html_container">
+                <t t-set="data_report_margin_top" t-value="10"/>
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="web.internal_layout">
+                        <div class="page" style="font-family:arial narrow;">
+                            <!--
+                            ENCABEZADO: LOGO A LA IZQUIERDA Y NOMBRE DE LA ENTIDAD CENTRADO
+                            -->
+                            <table class="table table-condensed" style="width:100%; border: 1px solid LightGray;">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 50%; border: 1px solid LightGray;">
+                                            <div class="col-xs-12">
+                                                <div class="oe_product_image">
+                                                    <p style="text-align: center; font-size: 12pt;">
+                                                    <img
+                                                        t-if="o.company_id.logo"
+                                                        t-att-src="'data:image/png;base64,'+ to_text(o.company_id.logo)"
+                                                        style="display:block; float:left; margin-left:auto; margin-right:auto;max-height:150px; max-width:150px"/>
+                                                        <br/>
+                                                        <b  t-if="len(o.company_id.name) &lt;= 40" style="font-size: 25pt; color:Black;"><t t-esc="o.company_id.name"/></b>
+                                                        <b  t-if="len(o.company_id.name) &gt; 40" style="font-size: 14pt; color:Black;"><t t-esc="o.company_id.name"/></b>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p style="font-size: 14pt"><strong>Diario Contable Nº: </strong>
+                                <t t-esc="o.name"/></p>
+                            <p style="font-size: 12pt"><strong>Diario: </strong>
+                                <t t-esc="o.journal_id.name"/></p>
+                            <table class="table" style="font-size: 10pt;">
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align: left; width: 40px;"><strong>Fecha: </strong></td>
+                                        <td style="text-align: left; width: 80px;"><t t-esc="o.date"/></td>
+                                        <td style="text-align: left; width: 60px;"><strong>Referencia: </strong></td>
+                                        <td style="text-align: left;"><t t-esc="o.ref"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table" style="font-size: 10pt;">
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align: left; width: 120px;"><strong>Nota Interna: </strong></td>
+                                        <td style="text-align: left; width: 1126px; font-size: 8pt; font-family:Monaco;"><span t-esc="o.narration"/></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p style="text-align: left;"><strong>Detalle Contable</strong></p>
+
+                            <table class="table-striped" style="font-size: 10pt">
+                                <thead>
+                                    <tr>
+                                        <th style="text-align: left; width: 80px;">Código</th>
+                                        <th style="text-align: left; width: 500px;">Cuenta</th>
+                                        <th style="text-align: left; width: 240px;">Entidad</th>
+                                        <th style="text-align: left; width: 200px;">Etiqueta</th>
+                                        <th style="text-align: right; width: 113px;">Debe</th>
+                                        <th style="text-align: right; width: 113px;">Haber</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="font-size: 10pt">
+                                    <t t-set="total_debit" t-value="0"/>
+                                    <t t-set="total_credit" t-value="0"/>
+                                    <t t-foreach="o.line_ids" t-as="move">
+                                        <tr>
+                                            <td style="text-align: left; width: 80px;">
+                                                <t t-esc="move.account_id.code"/></td>
+                                            <td style="text-align: left; width: 500px;">
+                                                <t t-esc="move.account_id.name"/></td>
+                                            <td style="text-align: left; width: 240px;">
+                                                <t t-esc="move.partner_id.name"/></td>
+                                            <td style="text-align: left; width: 200px;">
+                                                <t t-esc="move.name"/></td>
+                                            <td style="text-align: right; width: 113px;">
+                                                <span t-esc="move['debit']" t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}">
+                                                </span>
+                                            </td>
+                                            <td style="text-align: right; width: 113px;">
+                                                <span t-esc="move['credit']"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </td>
+                                            <t t-set="total_debit" t-value="total_debit+move['debit']"/>
+                                            <t t-set="total_credit" t-value="total_credit+move['credit']"/>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot style="font-size: 10pt">
+                                    <tr>
+                                        <td style="text-align: right;" colspan="4"> </td>
+                                        <td style="text-align: right; color:LightGray;">––––––––––––––––</td>
+                                        <td style="text-align: right; color:LightGray;">––––––––––––––––</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: right; font-size: 12pt;" colspan="4"><strong>TOTAL:</strong></td>
+                                        <td style="text-align: right; font-size: 12pt;">
+                                            <strong>
+                                                <span t-esc="total_debit "
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </strong>
+                                        </td>
+                                        <td style="text-align: right; font-size: 12pt;">
+                                            <strong>
+                                                <span t-esc="total_credit"
+                                                      t-options="{'widget': 'monetary', 'display_currency': res_company.currency_id}"/>
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <br/>
+                            <table style="width:35%; font-size: 10pt;">
+                                <tbody>
+                                    <tr>
+                                        <td colspan="1" class="text-center" style="border-top: 1px solid gray;">
+                                            <b>Elaborado por: </b>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="1" class="text-center">
+                                            <t t-esc="o.write_uid.name"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
